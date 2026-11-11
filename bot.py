@@ -9,6 +9,25 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 # Импорт конфигурации
 from config import TOKEN, GROUPS, PROFANITY_FILE
+import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class PingHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+    def log_message(self, format, *args):
+        pass  # убирает лишние записи из логов
+
+def run_http_server():
+    port = int(os.environ.get("PORT", 10000))  # Render сам задаёт PORT
+    HTTPServer(("0.0.0.0", port), PingHandler).serve_forever()
+
+threading.Thread(target=run_http_server, daemon=True).start()
 
 async def profanity_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка сообщений и проверка на мат."""
