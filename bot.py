@@ -32,8 +32,12 @@ threading.Thread(target=run_http_server, daemon=True).start()
 async def profanity_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка сообщений и проверка на мат."""
     message = update.message
-    if message is None or message.chat.id not in GROUPS:
-        return  # Игнорировать, если не в разрешенных группах
+    if message is None:
+        return
+    if message.chat.type not in ("group", "supergroup"):
+        return  # пропускаем личные сообщения
+    if GROUPS and message.chat.id not in GROUPS:
+        return  # если список групп задан, работаем только в нём
 
     text = message.text or message.caption or ""
     if not text:
