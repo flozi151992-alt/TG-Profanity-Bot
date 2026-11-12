@@ -1,7 +1,5 @@
-# Конфигурация для Telegram-бота фильтрации мата
+import os
 
-TOKEN = 'YOUR_BOT_TOKEN_HERE'  # Замените на токен вашего бота от BotFather
-
-GROUPS = [-1001234567890]  # Замените на ID чатов ваших групп (отрицательные для групп/супергрупп)
-
-PROFANITY_FILE = 'profanity_list.json'  # Путь к базе мата
+TOKEN = os.environ["TOKEN"]
+GROUPS = [int(x) for x in os.environ.get("GROUPS", "").split(",") if x.strip()]
+PROFANITY_FILE = "profanity_list.json"
