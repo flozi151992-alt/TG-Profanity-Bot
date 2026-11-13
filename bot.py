@@ -99,11 +99,11 @@ RU_MAP = str.maketrans({
 })
 
 # 18+ в разных записях
-AGE_RE = re.compile(r"\+\s*18|18\s*\+|18\s*plus|18\s*плюс|восемнадцать\s*плюс")
+AGE_RE = re.compile(r"(?<!\d)\+\s*18(?!\d)|(?<!\d)18\s*\+|18\s*plus|18\s*плюс|восемнадцать\s*плюс")
 
 # Буквы заменены знаками: "х*й", "п*зд", "е**ать", "м*д*а*к"
 MASKED_RE = re.compile(
-    r"х[^\w\s]+й|п[^\w\s]+з[^\w\s]*д|е[^\w\s]+(?:б|ать|ат)|м[^\w\s]+д[^\w\s]*а[^\w\s]*к"
+    r"х[^\w\s]+й|п[^\w\s]+з[^\w\s]*д|е[^\w\s]+(?:б(?![а-яё])|ать|ат)|м[^\w\s]+д[^\w\s]*а[^\w\s]*к"
 )
 
 EXACT, ROOTS, PHRASES = set(), set(), set()
@@ -193,9 +193,11 @@ def merge_letters(parts):
 
 
 def forms(low):
-    """Слова текста: как написаны и с заменой похожих букв."""
+    """Слова текста. Латиницу меняем на кириллицу только в словах, где есть русские буквы."""
     parts = [re.sub(r"[^a-zа-яё0-9]", "", w) for w in low.split()]
-    return merge_letters(parts) + merge_letters([p.translate(RU_MAP) for p in parts])
+    merged = merge_letters(parts)
+    mixed = [m.translate(RU_MAP) if re.search(r"[а-яё]", m) else m for m in merged]
+    return merged + mixed
 
 
 def word_hit(form):
